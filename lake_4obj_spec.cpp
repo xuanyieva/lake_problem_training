@@ -19,8 +19,7 @@ which is loaded by the var.txt (Numbers * nDays).********
    This simulation is designed for optimization with either Borg or the MOEA Framework.
    
    Stochasticity is introduced by:
-   1. Natural variability around anthropogenic pollution flow, which is represented by an 
-   SOW file.  SOW4.txt presents the known distribution (mean of 0.02 and log10(variance) of -5.5)
+
     and SOW6.txt presents a harsher distribution with a higher mean P level (0.03) 
     and more variability (log10(variance) of -5).  
 
