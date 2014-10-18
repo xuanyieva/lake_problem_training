@@ -18,4 +18,4 @@ For the matlab version, the following step should be followed:
 
 To get more infomations on BOEG Matlab Wrapper, please go to http://waterprogramming.wordpress.com/2014/01/21/compiling-the-borg-matlab-wrapper/.
 
-PS:This model may have some problems, I will correct it after I get the manual on Matlab Wrapper. If you have more ideas, please inform me, thank you~
+PS:I am not very sure on using the matlab wrapper, so pherhaps there are some problems. I will update it after I get the manual on Matlab Wrapper. If you have more ideas, please inform me, thank you~
