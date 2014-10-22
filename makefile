@@ -14,10 +14,10 @@ else
 endif
 
 compile:
-	$(CC) $(CFLAGS) $(LDFLAGS) -o lake_4obj_borg.exe lake_4obj_borg.cpp borg.c mt19937ar.c $(LIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o lake_4obj_borg.exe lake_4obj_borg.cpp ../Borg-1.7/borg.c ../Borg-1.7/mt19937ar.c $(LIBS)
 
 ifdef POSIX
-	$(CC) $(CFLAGS) $(LDFLAGS) -o borg.exe frontend.c borg.c mt19937ar.c $(LIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o borg.exe ../Borg-1.7/frontend.c ../Borg-1.7/borg.c ../Borg-1.7/mt19937ar.c $(LIBS)
 endif
 
 .PHONY: compile

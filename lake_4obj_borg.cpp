@@ -65,7 +65,7 @@ Additional features:
 #include <string>
 #include <sstream>
 using namespace std;
-#include "borg.h"
+#include "../Borg-1.7/borg.h"
 
 
 //define input parameters;
@@ -318,6 +318,7 @@ int main(int argc, char* argv[])
 	// Create the lakeproblem, defining the number of decision variables,
 	// objectives and constraints. 
      BORG_Problem problem = BORG_Problem_create(nvars, nobjs, nconsts, lake_problem);
+	 
 	// Set the lower and upper bounds for each decision variable.		 
 	for (int i=0; i<nvars; i++) 
 	{
@@ -336,6 +337,9 @@ int main(int argc, char* argv[])
 	
 	
 //BORG_Random_seed (seed);
+	
+	
+	
 	BORG_Archive result = BORG_Algorithm_run(problem, 100000);
 
 	// Print the Pareto optimal solutions.
