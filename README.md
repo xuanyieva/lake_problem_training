@@ -18,4 +18,3 @@ For the Matlab version, the following step should be followed:
 
 To get more informations on BORG Matlab Wrapper, please go to http://waterprogramming.wordpress.com/2014/01/21/compiling-the-borg-matlab-wrapper/.
 
-PS:I am not very sure on using the Matlab wrapper, so perhaps there are some problems. I will update it after I get the manual on Matlab Wrapper. If you have more ideas, please inform me, thank you~
