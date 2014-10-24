@@ -25,9 +25,8 @@ benefits=zeros(1,nSamples);
 obj3=0;
 obj4=0;
 for i=1:nSamples
-    for t=1:nvars
-        nat_flow(t)=lognrnd(-3.52,0.105);
-    end
+    
+    nat_flow=lognrnd(-3.52,0.105,1,nvars);
     lake_stateX0=0;
     
     for t=1:nvars
