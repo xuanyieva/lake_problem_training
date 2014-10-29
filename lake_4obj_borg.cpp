@@ -1,4 +1,4 @@
-/* LakeProblem_4Obj_1Const_Stoch.cpp
+/* LakeProblem_4Obj_1Const_Stoch.cpp   parallel version   runtime,etc  
    
    Riddhi Singh, May, 2014
    The Pennsylvania State University
@@ -64,8 +64,9 @@ Additional features:
 #include <math.h>
 #include <string>
 #include <sstream>
+#include <mpi.h>
 using namespace std;
-#include "../Borg-1.7/borg.h"
+#include "../borg-ms-code/borgms.h"
 
 
 //define input parameters;
@@ -124,7 +125,7 @@ for (i=0;i<nDays;i++)
      inter_objs3[sample]=0.00;
 	 inter_objs4[sample]=0.00;
   } 
-    //printf("inter, %lf %'f %lf %lf\n", inter_objs1[99],inter_objs2,inter_objs3,inter_objs4);
+
 
 /*  //choose the 100 samples in 10000 samples,using the specific values before the random values;
  //nature flow 
@@ -138,11 +139,11 @@ while (i<10000)
   
   int lines[nSamples];
   srand (time(NULL));
-  //printf("%d \n", rand()%100);
+
  for (sample=0;sample <nSamples;sample++)
   {
      lines[sample] = rand()%10000;
-	  //printf("rand, %d \n", lines[sample]);
+
   }
   int j=0;
  
@@ -159,11 +160,10 @@ for (sample=0;sample<nSamples;sample++)
 	 
 	  //random selection from the nature flow matrix ( nat_flowmat)
      int index=lines[sample]; 
-	 //printf("%d ",index);
+
      for(i=0;i<nDays;i++)
 	 {
         nat_flow[i]=nat_flowmat[index][i];
-	//	printf("%lf ",nat_flow[i]);
 		
 	 }
 	 
@@ -275,7 +275,7 @@ for (sample=0;sample<nSamples;sample++)
       objs[2]    = -objs[2];     //want to maximize the probability of maintaining inertia (warning will change when connect with borg)
       objs[3]    = -objs[3];     //want to maximize reliability
 	  
-	 // printf("%lf %'f %lf %lf\n", objs[0],objs[1],objs[2],objs[3]);
+
 	  
 	  delete [] inter_objs1;
 	  delete [] inter_objs2;
@@ -294,7 +294,7 @@ int main(int argc, char* argv[])
   double *objs=new double [nobjs];
   double *consts=new double [nconsts];// or  double consts[nconsts]? 
   
-
+//load input data of natural polluted flow 
   
     for(int i=0; i<10000;i++)
 	{
@@ -315,41 +315,95 @@ int main(int argc, char* argv[])
 	 fclose (fp);
 
 	 
-	// Create the lakeproblem, defining the number of decision variables,
-	// objectives and constraints. 
-     BORG_Problem problem = BORG_Problem_create(nvars, nobjs, nconsts, lake_problem);
-	 
-	// Set the lower and upper bounds for each decision variable.		 
-	for (int i=0; i<nvars; i++) 
-	{
-		BORG_Problem_set_bounds(problem, i, 0.0, 0.1);
+
+  int rank;
+  //time_t start ;
+  char runtime[256];
+  char outputFilename[256];
+  int seed;
+  
+  // All master-slave runs need to call startup and set the runtime
+  // limits.
+  BORG_Algorithm_ms_startup(&argc, &argv);
+  BORG_Algorithm_ms_max_time(0.1);
+  BORG_Algorithm_ms_max_evaluations(100000);
+  
+  
+  // Define the problem. 
+  BORG_Problem problem = BORG_Problem_create(nvars, nobjs, nconsts, lake_problem);
+  
+  
+  //set upper and lower bound
+	for (int i=0; i<nvars; i++) {
+		BORG_Problem_set_bounds(problem, i, 0.0, 1.0);
 	}
-	 
-	 	// Set the epsilon values used by the Borg MOEA.  Epsilons define the
-	// problem resolution, which controls how many Pareto optimal solutions
-	// are generated and how far apart they are spaced.
-	for (int i=0; i<nobjs; i++) {
-		BORG_Problem_set_epsilon(problem, i, 0.01);
+  
+  
+  //set epsilon
+  BORG_Problem_set_epsilon(problem, 0, 0.01);
+  BORG_Problem_set_epsilon(problem, 1, 0.01);
+  BORG_Problem_set_epsilon(problem, 2, 0.001);
+  BORG_Problem_set_epsilon(problem, 3, 0.001);
+
+  // Get the rank of this process.  The rank is used to ensure each
+  // parallel process uses a different random seed.
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+  
+  // When running experiments, we want to run the algorithm multiple
+  // times and average the results.
+  for (int i=0; i<100; i++) //100 seed 
+  {
+	// Save runtime dynamics to a file.  Only the master node
+	// will write to this file.  Note how we create separate
+	// files for each run.
+	sprintf(runtime, "./runtime_%d.txt", i);
+	sprintf(outputFilename,"./end_of_run_%d.txt",i);
+	
+	BORG_Algorithm_output_runtime(runtime);
+	BORG_Algorithm_output_frequency(500); //set the runtime frequency is 500
+
+	// Seed the random number generator.
+	seed=37*i*(rank+1);
+	BORG_Random_seed(seed);
+
+	// Run the master-slave Borg MOEA on the problem.
+	BORG_Archive result = BORG_Algorithm_ms_run(problem);
+
+	// Only the master process will return a non-NULL result.
+	// Print the Pareto optimal solutions to the screen.
+	if (result != NULL) {
+		FILE *outputFile=fopen(outputFilename,"w");
+			
+		if(!outputFile){
+			BORG_Debug("Unable to open file output\n");
+		}
+		//print header text to output File
+		fprintf(outputFile, "# BORG version: %s\n", BORG_VERSION);
+		//fprintf(outputFile, "# Current time: %s", ctime(&start));
+		fprintf(outputFile, "# Problem: %s", argv[0]);
+
+		fprintf(outputFile, "\n");
+		//fprintf(outputFile, "# Number of variables: %d\n", nvars);
+		//fprintf(outputFile, "# Number of objectives: %d\n", nobjs);
+		//fprintf(outputFile, "# Number of constraints: %d\n", nconsts);	
+		fprintf(outputFile, "# Seed: %d\n", seed);
+			
+		
+		BORG_Archive_print(result, stdout);
+		fprintf(outputFile,"# \n");
+		fprintf(outputFile,"#Finished");
+		
+		BORG_Archive_destroy(result);
+		fclose(outputFile);
 	}
+  }
 
-	// Run the Borg MOEA on the lake problem for 10 thousands function
-	// evaluations.
+  // Shutdown the parallel processes and exit.
+  BORG_Algorithm_ms_shutdown();
+  BORG_Problem_destroy(problem);
+  return EXIT_SUCCESS;
 	
-	
-//BORG_Random_seed (seed);
-	
-	
-	
-	BORG_Archive result = BORG_Algorithm_run(problem, 100000);
-
-	// Print the Pareto optimal solutions.
-	BORG_Archive_print(result, stdout);
- 
-	// Free any allocated memory.
-	BORG_Archive_destroy(result);
-	BORG_Problem_destroy(problem);
-	return EXIT_SUCCESS;
-
 }
 
 
