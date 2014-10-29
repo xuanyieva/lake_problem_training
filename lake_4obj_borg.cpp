@@ -65,6 +65,7 @@ Additional features:
 #include <string>
 #include <sstream>
 #include <mpi.h>
+//#include <time.h>
 using namespace std;
 #include "../borg-ms-code/borgms.h"
 
@@ -290,9 +291,9 @@ int main(int argc, char* argv[])
   nvars=nDays;
   nobjs=4;
   nconsts=1;
-  double *vars= new double [nvars];
-  double *objs=new double [nobjs];
-  double *consts=new double [nconsts];// or  double consts[nconsts]? 
+ // double *vars= new double [nvars];
+//  double *objs=new double [nobjs];
+  //double *consts=new double [nconsts];// or  double consts[nconsts]? 
   
 //load input data of natural polluted flow 
   
@@ -317,7 +318,7 @@ int main(int argc, char* argv[])
 	 
 
   int rank;
-  //time_t start ;
+  time_t start ;
   char runtime[256];
   char outputFilename[256];
   int seed;
@@ -325,7 +326,7 @@ int main(int argc, char* argv[])
   // All master-slave runs need to call startup and set the runtime
   // limits.
   BORG_Algorithm_ms_startup(&argc, &argv);
-  BORG_Algorithm_ms_max_time(0.1);
+  BORG_Algorithm_ms_max_time(0.5);
   BORG_Algorithm_ms_max_evaluations(100000);
   
   
@@ -335,7 +336,7 @@ int main(int argc, char* argv[])
   
   //set upper and lower bound
 	for (int i=0; i<nvars; i++) {
-		BORG_Problem_set_bounds(problem, i, 0.0, 1.0);
+		BORG_Problem_set_bounds(problem, i, 0.0, 0.1);
 	}
   
   
@@ -357,8 +358,8 @@ int main(int argc, char* argv[])
 	// Save runtime dynamics to a file.  Only the master node
 	// will write to this file.  Note how we create separate
 	// files for each run.
-	sprintf(runtime, "./runtime_%d.txt", i);
-	sprintf(outputFilename,"./end_of_run_%d.txt",i);
+	sprintf(runtime, "../results/runtime_%d.txt", i);
+	sprintf(outputFilename,"../results/end_of_run_%d.txt",i);
 	
 	BORG_Algorithm_output_runtime(runtime);
 	BORG_Algorithm_output_frequency(500); //set the runtime frequency is 500
@@ -380,7 +381,7 @@ int main(int argc, char* argv[])
 		}
 		//print header text to output File
 		fprintf(outputFile, "# BORG version: %s\n", BORG_VERSION);
-		//fprintf(outputFile, "# Current time: %s", ctime(&start));
+		fprintf(outputFile, "# Current time: %s", ctime(&start));
 		fprintf(outputFile, "# Problem: %s", argv[0]);
 
 		fprintf(outputFile, "\n");
@@ -390,9 +391,9 @@ int main(int argc, char* argv[])
 		fprintf(outputFile, "# Seed: %d\n", seed);
 			
 		
-		BORG_Archive_print(result, stdout);
+		BORG_Archive_print(result, outputFile);
 		fprintf(outputFile,"# \n");
-		fprintf(outputFile,"#Finished");
+		//fprintf(outputFile,"#Finished");
 		
 		BORG_Archive_destroy(result);
 		fclose(outputFile);
