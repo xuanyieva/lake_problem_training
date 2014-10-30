@@ -65,7 +65,8 @@ Additional features:
 #include <string>
 #include <sstream>
 using namespace std;
-#include "../Borg-1.7/borg.h"
+//#include "../Borg-1.7/borg.h"
+#include "../MOEAFramework/MOEAFramework-2.3/examples/moeaframework.h"
 
 
 //define input parameters;
@@ -82,7 +83,7 @@ using namespace std;
 //define threshold
 #define permit 0.5
 #define reli_thes 0.85 //reliability>reli_thes
-#define ine_thes -0.02 //why the change between steps should be >-0.02?
+#define ine_thes -0.02 //the change between steps should be >-0.02
 
 
 int nobjs=4;
@@ -92,14 +93,6 @@ double nat_flowmat [10000][nDays]; //warning: 100*100  no stocha at first
 
 
 
-/*void lake_simulation(double *ant_flow, double *nat_flow, double *lake_stateX, double *utility,double *npv_util)
-{
-
-
-
-stateX,utility, npv_util
-
-}*/
 
 
 void lake_problem (double *vars,double *objs, double *consts)
@@ -124,25 +117,14 @@ for (i=0;i<nDays;i++)
      inter_objs3[sample]=0.00;
 	 inter_objs4[sample]=0.00;
   } 
-    //printf("inter, %lf %'f %lf %lf\n", inter_objs1[99],inter_objs2,inter_objs3,inter_objs4);
 
-/*  //choose the 100 samples in 10000 samples,using the specific values before the random values;
- //nature flow 
- int lines[nSamples]; 
- i=0;
-while (i<10000)
- {
-     lines[i]=i;
-	 i=i+100;
-  }*/
   
   int lines[nSamples];
   srand (time(NULL));
-  //printf("%d \n", rand()%100);
+
  for (sample=0;sample <nSamples;sample++)
   {
      lines[sample] = rand()%10000;
-	  //printf("rand, %d \n", lines[sample]);
   }
   int j=0;
  
@@ -192,7 +174,7 @@ for (sample=0;sample<nSamples;sample++)
 	        }
 			utility[i]=alpha*ant_flow[i]-beta*pow(lake_stateX[i],2);
 			benefit[i]=alpha*ant_flow[i];
-			//printf("%lf %lf \n",inter_objs1[i],benefit[i]); 
+
 		}	 
 	 for (i=0;i<nDays;i++)
 	    {
@@ -200,10 +182,7 @@ for (sample=0;sample<nSamples;sample++)
 		   if (lake_stateX[i]<permit)
 		    inter_objs3[sample]++;
 		   
-/* 		   do{
-		       if(change[i]>ine_thes)
-			   {inter_objs4[sample]++;}
-			   }while(i>0); */
+
 			   
 			   if(i>0)
 			   {
@@ -212,7 +191,7 @@ for (sample=0;sample<nSamples;sample++)
 				  }
 			 
 	    }
-			  //   printf("%lf %lf  %lf\n",inter_objs2[sample],inter_objs3[sample],inter_objs4[sample]);
+
 		//clear memory	   
 			   delete [] lake_stateX;
 			   delete [] nat_flow;
@@ -220,8 +199,7 @@ for (sample=0;sample<nSamples;sample++)
 			   delete [] benefit;
 			   delete [] utility;
 
-	 	/*   j++;
-	  printf("%d\n",j); */
+
 	 
 	}
 
@@ -275,7 +253,7 @@ for (sample=0;sample<nSamples;sample++)
       objs[2]    = -objs[2];     //want to maximize the probability of maintaining inertia (warning will change when connect with borg)
       objs[3]    = -objs[3];     //want to maximize reliability
 	  
-	 // printf("%lf %'f %lf %lf\n", objs[0],objs[1],objs[2],objs[3]);
+
 	  
 	  delete [] inter_objs1;
 	  delete [] inter_objs2;
@@ -287,12 +265,13 @@ for (sample=0;sample<nSamples;sample++)
 	
 int main(int argc, char* argv[]) 
 {
-  nvars=nDays;
-  nobjs=4;
-  nconsts=1;
-  double *vars= new double [nvars];
-  double *objs=new double [nobjs];
-  double *consts=new double [nconsts];// or  double consts[nconsts]? 
+  // nvars=nDays;
+  //nobjs=4;
+ // nconsts=1;
+
+ 
+ //int random_seed;
+ //random_seed=strtod(argv[1],NULL);  //turn char into string
   
 
   
@@ -313,42 +292,22 @@ int main(int argc, char* argv[])
 	 {fscanf(fp,"%lf",&nat_flowmat[i][j]);} 
 	 }
 	 fclose (fp);
-
 	 
-	// Create the lakeproblem, defining the number of decision variables,
-	// objectives and constraints. 
-     BORG_Problem problem = BORG_Problem_create(nvars, nobjs, nconsts, lake_problem);
-	 
-	// Set the lower and upper bounds for each decision variable.		 
-	for (int i=0; i<nvars; i++) 
-	{
-		BORG_Problem_set_bounds(problem, i, 0.0, 0.1);
-	}
-	 
-	 	// Set the epsilon values used by the Borg MOEA.  Epsilons define the
-	// problem resolution, which controls how many Pareto optimal solutions
-	// are generated and how far apart they are spaced.
-	for (int i=0; i<nobjs; i++) {
-		BORG_Problem_set_epsilon(problem, i, 0.01);
-	}
 
-	// Run the Borg MOEA on the lake problem for 10 thousands function
-	// evaluations.
-	
-	
-//BORG_Random_seed (seed);
-	
-	
-	
-	BORG_Archive result = BORG_Algorithm_run(problem, 100000);
-
-	// Print the Pareto optimal solutions.
-	BORG_Archive_print(result, stdout);
+  double vars[nvars];
+  double objs[nobjs];
+  double consts[nconsts];
  
-	// Free any allocated memory.
-	BORG_Archive_destroy(result);
-	BORG_Problem_destroy(problem);
-	return EXIT_SUCCESS;
+  MOEA_Init(nobjs, nconsts);
+  
+  while (MOEA_Next_solution() == MOEA_SUCCESS) {
+    MOEA_Read_doubles(nvars, vars);
+    lake_problem(vars, objs, consts);
+    MOEA_Write(objs, consts);
+  }
+  
+  MOEA_Terminate();
+  return EXIT_SUCCESS;
 
 }
 
