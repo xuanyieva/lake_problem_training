@@ -1,19 +1,20 @@
-/* LakeProblem_4Obj_1Const_Stoch.cpp
-   
-   Riddhi Singh, May, 2014
-   The Pennsylvania State University
-   rus197@psu.edu
+/* lake_4obj.cpp
+  
+  Original version  lake_4obj_borg.cpp, because I try to use the MOEAFramework instead of BORG, so I changed the name.
+  
 
-   Adapted by Tori Ward, July 2014 
-   Cornell University
-   vlw27@cornell.edu
+  Connected with MOEAFramework-2.3
    
-   Adapted by Xuan Yi, October 2014 
+   Xuan Yi, October 2014 
    Peking University
    xuanyi.eva@gmail.com
+   
+   Adapted from  
+   Riddhi Singh, May, 2014
+   Tori Ward, July 2014
 
    A multi-objective represention of the lake model from Carpenter et al., 1999
-   This simulation is designed for optimization with either Borg or the MOEA Framework.
+
    
    Stochasticity is introduced by:
    1. Natural variability around anthropogenic pollution flow, which is represented by an 
