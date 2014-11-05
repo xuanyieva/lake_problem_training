@@ -9,7 +9,12 @@ To run the specific variables version, download the var.txt, lake_4obj_spec.cpp,
 To run the borg version, download the lake_4obj_borg.cpp,SOWs_Type6.txt,makefile and put them in the same folder(Borg 1.7 folder is out of the folder), type make in the command line for compiling, and then type   ./lake_4obj_borg to run the model.
 
 
-
+To do the random seed test:
+1) mannually change the seed:
+ ./lake_4obj_borg 1（number of seed)  >output.txt
+to run the exe, inbedded way.
+2) using the batch to automatically changing the seed and store the results into one file:
+ run the bash     ./runRandomSeedBorg.sh
 
 For the Matlab version, the following step should be followed:
 1)Check and install compiler:  running mex-setup at the matlab command line.If there is not any compiler, it will show NONE. In this case, try to install one. On Windows 7/8, Matlab 2012~2014, Windows SDK 7.1 is recommended (go to http://www.mathworks.com/matlabcentral/answers/101105-how-do-i-install-microsoft-windows-sdk-7-1 to get more details).

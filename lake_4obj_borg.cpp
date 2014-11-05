@@ -138,10 +138,10 @@ while (i<10000)
   
   int lines[nSamples];
   srand (time(NULL));
-  //printf("%d \n", rand()%100);
  for (sample=0;sample <nSamples;sample++)
   {
      lines[sample] = rand()%10000;
+	 //lines[sample] = sample*100;  //make as the determined in order to avoid the influences from monte carlo
 	  //printf("rand, %d \n", lines[sample]);
   }
   int j=0;
@@ -293,6 +293,8 @@ int main(int argc, char* argv[])
   double *vars= new double [nvars];
   double *objs=new double [nobjs];
   double *consts=new double [nconsts];// or  double consts[nconsts]? 
+ int random_seed;
+ random_seed=strtod(argv[1],NULL);  //term char into string
   
 
   
@@ -336,7 +338,7 @@ int main(int argc, char* argv[])
 	// evaluations.
 	
 	
-//BORG_Random_seed (seed);
+    BORG_Random_seed (seed);
 	
 	
 	
