@@ -1,3 +1,5 @@
+
+//this is a link between the external lake problem with the MOEAFramework.
 import java.io.File;
 import java.io.IOException;
 
@@ -7,12 +9,10 @@ import org.moeaframework.core.Solution;
 import org.moeaframework.core.variable.RealVariable;
 import org.moeaframework.problem.ExternalProblem;
 
-public class LakeProblem {
+public class LakeProblem extends ExternalProblem {
 
-	public static class ExternalLakeProblem extends ExternalProblem {
-
-		public ExternalLakeProblem() throws IOException {
-			super("LakeProblem.exe");
+		public LakeProblem() throws IOException {
+			super("./LakeProblem.exe");//run in the cube, it should be put into an "examples" foulder: ./examples/LakeProblem.exe
 		}
 
 		@Override
@@ -48,31 +48,5 @@ public class LakeProblem {
 		}
 		
 	}
-
 	
-	public static void main(String[] args) {
-		//check if the executable exists
-		File file = new File("./LakeProblem.exe");
-				
-		if (!file.exists()) {
-			System.err.println("Please compile the executable by running make in the folder");
-			return;
-		}
-		
 
-		NondominatedPopulation result = new Executor()
-				.withProblemClass(ExternalLakeProblem.class)
-				.withAlgorithm("NSGAII")
-				.withMaxEvaluations(10000)
-				.run();
-				
-		//display the results
-		System.out.format("Objective1  Objective2  Objective3  Objective4 %n");
-		
-		for (Solution solution : result) {
-			System.out.format("%.4f      %.4f    %.4f     %4f\n",
-					solution.getObjective(0),solution.getObjective(1),solution.getObjective(2),solution.getObjective(3));
-		}
-	}
-	
-}
